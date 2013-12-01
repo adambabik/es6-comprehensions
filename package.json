@@ -1,0 +1,29 @@
+{
+  "name": "es6-comprehensions",
+  "version": "0.1.0",
+  "description": "Array comprehensions compiled to ES5.",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --recursive --reporter spec --timeout 500 test"
+  },
+  "dependencies": {
+    "esprima": "git://github.com/ariya/esprima.git#harmony",
+    "recast": "~0.4.24",
+    "through": "~2.3.4"
+  },
+  "devDependencies": {
+    "mocha": "~1.14.0",
+    "expect.js": "~0.2.0"
+  },
+  "keywords": [
+    "array",
+    "list",
+    "comprehension",
+    "es6",
+    "es5",
+    "parser",
+    "ast"
+  ],
+  "author": "Adam Babik",
+  "license": "BSD-2-Clause"
+}
