@@ -1,1 +1,1 @@
-[ x for (x of [1, 2, 3, 4, 5]) ];
+var squared = [ square(x) for (x of [1,2,3,4,5]) ];
