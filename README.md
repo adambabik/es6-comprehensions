@@ -9,7 +9,16 @@ Compiles JavaScript array comprehensions (proposed in ES6) to ES5-compatible syn
 compiles to:
 
 ```js
-...
+(function() {
+  var result = [];
+
+  for (var i_0 = 0, arr_0 = [1, 2, 3, 4, 5], len_0 = arr_0.length, x; i_0 < len_0; i_0++) {
+    x = arr_0[i_0];
+    result.push(x);
+  }
+
+  return result;
+})();
 ```
 
 For more information check out the following sources [http://wiki.ecmascript.org/doku.php?id=harmony:array_comprehensions](ECMAScript proposal and translation to the expression) and [http://tc39wiki.calculist.org/es6/array-comprehensions/](TC39wiki).
@@ -19,10 +28,6 @@ For more information check out the following sources [http://wiki.ecmascript.org
 ```
 $ npm install es6-comprehensions
 ```
-
-## Usage
-
-@TODO
 
 ## Support
 

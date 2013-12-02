@@ -64,23 +64,27 @@ function replaceComprehensionBlock(block, idx, insertNode) {
         builder.literal(0)
       ),
       builder.variableDeclarator(
+        builder.identifier('arr_' + idx),
+        block.right
+      ),
+      builder.variableDeclarator(
+        builder.identifier('len_' + idx),
+        builder.memberExpression(
+          builder.identifier('arr_' + idx),
+          builder.identifier('length'),
+          false
+        )
+      ),
+      builder.variableDeclarator(
         builder.identifier(block.left.name),
         null
       ),
-      builder.variableDeclarator(
-        builder.identifier('arr_' + idx),
-        block.right
-      )
     ]),
     // test
     builder.binaryExpression(
       '<',
       builder.identifier('i_' + idx),
-      builder.memberExpression(
-        builder.identifier('arr_' + idx),
-        builder.identifier('length'),
-        false
-      )
+      builder.identifier('len_' + idx)
     ),
     // update
     builder.updateExpression(
@@ -94,13 +98,11 @@ function replaceComprehensionBlock(block, idx, insertNode) {
 }
 
 /**
- * Parses source code and replaces array comprehensions
- * with a IIFE that returns an array.
+ * Parses source code and return AST.
  * @param  {string} fileData Input source code
- * @param  {object} options  Output formatting options
- * @return {string}
+ * @return {object}          AST
  */
-parser.parse = function parse(fileData, options) {
+parser.parse = function parse(fileData) {
   var ast = buildAST(fileData);
   var tmpArray = builder.identifier('result');
 
@@ -125,11 +127,11 @@ parser.parse = function parse(fileData, options) {
 
     var body = child.filter
       ? builder.ifStatement(
-        // test
-        child.filter,
-        // consequent
-        builder.blockStatement([push])
-      )
+          // test
+          child.filter,
+          // consequent
+          builder.blockStatement([push])
+        )
       : push;
 
     // Explanation based on:
@@ -178,9 +180,9 @@ parser.parse = function parse(fileData, options) {
               tmpArray
             )
           ]),
-          // generator
+          // is a generator
           false,
-          // expression
+          // is an expression
           false
         ),
         // arguments
@@ -190,6 +192,21 @@ parser.parse = function parse(fileData, options) {
 
     this.replace(replacement);
   }); // end traverse
+
+  return ast;
+};
+
+/**
+ * Parses source code and replaces array comprehensions
+ * with a IIFE that returns an array.
+ * @param  {string} fileData   Input source code
+ * @param  {object} [options]  Output formatting options
+ * @return {string}
+ */
+parser.transform = function transform(fileData, options) {
+  options || (options = {});
+
+  var ast = parser.parse(fileData);
 
   return recast.print(ast, util._extend(recastOptions, options));
 };

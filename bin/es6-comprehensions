@@ -31,7 +31,7 @@ function getStream() {
   }
 
   function end() {
-    this.queue(parser.parse(data));
+    this.queue(parser.transform(data));
     this.queue(null);
   }
 

@@ -1,5 +1,4 @@
 var parser = require('./src/parser');
+var util   = require('util');
 
-module.exports = {
-  parse: parser.parse
-};
+util._extend(module.exports, parser);
