@@ -5,7 +5,7 @@ var transform  = require('..').transform;
 var parse  = require('..').parse;
 
 describe('parser', function () {
-  describe('parse', function () {
+  describe('transform', function () {
     it('array comprehension with identity transformation returns the same array', function () {
       var code = '[ x for (x of [1,2,3]) ]';
       expect(eval(transform(code))).to.eql([1,2,3]);
@@ -31,6 +31,13 @@ describe('parser', function () {
     it('array comprehension with custom transformation', function () {
       var code = 'function add(a, b) { return a + b }; [ add(x, y) for (x of [1,1,1]) for (y of [2]) ]';
       expect(eval(transform(code))).to.eql([3,3,3]);
+    });
+
+    // Full syntax:
+    // http://people.mozilla.org/~jorendorff/es6-draft.html#sec-array-comprehension
+    it('array comprehension with new syntax', function () {
+      var code = '[ for (x of [1,2]) for (y of [1,2]) x * y ];';
+      expect(eval(transform(code))).to.eql([1,2,2,4]);
     });
   });
 });
