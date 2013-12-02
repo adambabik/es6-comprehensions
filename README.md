@@ -21,7 +21,7 @@ var squared = (function() {
 })();
 ```
 
-For more information check out the following sources [http://wiki.ecmascript.org/doku.php?id=harmony:array_comprehensions](ECMAScript proposal and translation to the expression) and [http://tc39wiki.calculist.org/es6/array-comprehensions/](TC39wiki).
+For more information check out the following sources [ECMAScript proposal and translation to the expression](http://wiki.ecmascript.org/doku.php?id=harmony:array_comprehensions) and [TC39wiki](http://tc39wiki.calculist.org/es6/array-comprehensions/).
 
 ## Installation
 
