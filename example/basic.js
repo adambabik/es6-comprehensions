@@ -1,1 +1,1 @@
-var squared = [ square(x) for (x of [1,2,3,4,5]) ];
+var squared = [ for (x of [1,2,3,4,5]) if (x > 2) x * x ];

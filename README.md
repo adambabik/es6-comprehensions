@@ -3,7 +3,7 @@
 Compiles JavaScript array comprehensions (proposed in ES6) to ES5-compatible syntax. For instance:
 
 ```js
-var squared = [ square(x) for (x of [1,2,3,4,5]) ]
+var squared = [ for (x of [1,2,3,4,5]) if (x > 2) x * x ];
 ```
 
 compiles to:
@@ -14,14 +14,19 @@ var squared = (function() {
 
   for (var i_0 = 0, arr_0 = [1,2,3,4,5], len_0 = arr_0.length, x; i_0 < len_0; i_0++) {
     x = arr_0[i_0];
-    result.push(square(x));
+
+    if (x > 2) {
+      result.push(x * x);
+    }
   }
 
   return result;
 })();
 ```
 
-For more information check out the following sources [ECMAScript proposal and translation to the expression](http://wiki.ecmascript.org/doku.php?id=harmony:array_comprehensions) and [TC39wiki](http://tc39wiki.calculist.org/es6/array-comprehensions/).
+For more information check out [the current draft for ECMAScript 6](http://people.mozilla.org/~jorendorff/es6-draft.html#sec-array-comprehension).
+
+Please notice that the syntax has changed and many resources is still using old one.
 
 ## Installation
 
@@ -33,7 +38,7 @@ $ npm install es6-comprehensions
 
 Array comprehensions progressed to the Draft ECMAScript 6 Specification. It doesn't mean that there will be no changes or that array comprehensions will be included in the final ES6 Specification.
 
-ES6 defines also [iterators](http://tc39wiki.calculist.org/es6/iterators/) that can be used together with [for-of loops](http://tc39wiki.calculist.org/es6/for-of/) that can be used in array comprehensions. This translator does **not** support iterators in `for-of` loops. It translates `for-of` loops to plain `for` loops. Thus, supports only plain JS arrays.
+ES6 defines also [iterators](http://tc39wiki.calculist.org/es6/iterators/) that can be used together with [for-of loops](http://tc39wiki.calculist.org/es6/for-of/) that can be used in array comprehensions. This translator does **not** support iterators in `for-of` loops. It translates `for-of` loops to plain `for` loops. Thus, it supports only plain JS arrays.
 
 ## TODO
 

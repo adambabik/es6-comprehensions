@@ -1,6 +1,6 @@
 {
   "name": "es6-comprehensions",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Array comprehensions compiled to ES5.",
   "main": "index.js",
   "scripts": {
