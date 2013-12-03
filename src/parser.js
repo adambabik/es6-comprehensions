@@ -135,7 +135,7 @@ parser.parse = function parse(fileData) {
       : push;
 
     // Explanation based on:
-    // http://wiki.ecmascript.org/doku.php?id=harmony:array_comprehensions
+    // http://people.mozilla.org/~jorendorff/es6-draft.html#sec-array-comprehension
     //
     // Array comprehension consists of body, blocks and filter.
     // Body is an actual transformation performed on items.

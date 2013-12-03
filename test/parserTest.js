@@ -1,8 +1,8 @@
 var mocha  = require('mocha');
 var expect = require('expect.js');
 
-var transform  = require('..').transform;
-var parse  = require('..').parse;
+var transform = require('..').transform;
+var parse     = require('..').parse;
 
 describe('parser', function () {
   describe('transform', function () {
@@ -12,7 +12,7 @@ describe('parser', function () {
     });
 
     it('array comprehension with identity transformation and filter returns part of the array', function () {
-      var code = '[ for (x of [1,2,3]) if (x > 2) x]';
+      var code = '[ for (x of [1,2,3]) if (x > 2) x ]';
       expect(eval(transform(code))).to.eql([3]);
     });
 
