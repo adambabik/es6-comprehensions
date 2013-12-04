@@ -1,8 +1,9 @@
 {
   "name": "es6-comprehensions",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Array comprehensions compiled to ES5.",
   "main": "index.js",
+  "bin": "bin/es6-comprehensions",
   "scripts": {
     "test": "mocha --recursive --reporter spec --timeout 500 test"
   },

@@ -98,7 +98,7 @@ function replaceComprehensionBlock(block, idx, insertNode) {
 }
 
 /**
- * Parses source code and return AST.
+ * Parses source code and returns transformed AST.
  * @param  {string} fileData Input source code
  * @return {object}          AST
  */

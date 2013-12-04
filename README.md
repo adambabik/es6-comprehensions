@@ -42,8 +42,9 @@ ES6 defines also [iterators](http://tc39wiki.calculist.org/es6/iterators/) that 
 
 ## TODO
 
-* Provide support for other structures, not only plain JS arrays.
-* Improve quality of the generated code.
+* Provide support for other structures, not only plain JS arrays,
+* Improve quality of the generated code,
+* Think of migration to escodegen instead of recast.
 
 ## Development
 
