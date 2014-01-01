@@ -42,9 +42,8 @@ ES6 defines also [iterators](http://tc39wiki.calculist.org/es6/iterators/) that 
 
 ## TODO
 
-* Provide support for other structures, not only plain JS arrays,
-* Improve quality of the generated code,
-* Think of migration to escodegen instead of recast.
+* Consider replacing plain `for` loop with `forEach` method. It will result in more compact code,
+* Consider migration to escodegen.
 
 ## Development
 

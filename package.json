@@ -1,6 +1,6 @@
 {
   "name": "es6-comprehensions",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Array comprehensions compiled to ES5.",
   "main": "index.js",
   "bin": "bin/es6-comprehensions",
