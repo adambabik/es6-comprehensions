@@ -20,7 +20,7 @@
     "evil"          : false,
     "expr"          : true,
     "globalstrict"  : true,
-    "laxbreak"      : false,
+    "laxbreak"      : true,
     "laxcomma"      : false,
 
     "browser"       : false,

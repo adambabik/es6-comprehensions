@@ -1,3 +1,5 @@
+"use strict";
+
 var esprima = require('esprima'), // harmony version, check out package.json
     recast  = require('recast'),
     builder = recast.builder,
@@ -7,9 +9,13 @@ var esprima = require('esprima'), // harmony version, check out package.json
 var parser = module.exports;
 
 var recastOptions = {
-  tabWidth : 2,
-  esprima  : esprima
+  esprima : esprima
 };
+
+/* @type function */
+function createPrivId(name) {
+  return '$$' + name;
+}
 
 /**
  * Returns AST.
@@ -18,15 +24,6 @@ var recastOptions = {
  */
 function buildAST(source) {
   return recast.parse(source, recastOptions);
-}
-
-/**
- * Returns AST as a pretty JSON.
- * @param  {object} ast
- * @return {string}
- */
-function prettyLog(ast) {
-  return JSON.stringify(ast, null, recastOptions.tabWidth);
 }
 
 /**
@@ -44,8 +41,8 @@ function replaceComprehensionBlock(block, idx, insertNode) {
         '=',
         builder.identifier(block.left.name),
         builder.memberExpression(
-          builder.identifier('arr_' + idx),
-          builder.identifier('i_' + idx),
+          builder.identifier(createPrivId('arr' + idx)),
+          builder.identifier(createPrivId('i' + idx)),
           true
         )
       )
@@ -60,17 +57,17 @@ function replaceComprehensionBlock(block, idx, insertNode) {
     // init
     builder.variableDeclaration('var', [
       builder.variableDeclarator(
-        builder.identifier('i_' + idx),
+        builder.identifier(createPrivId('i' + idx)),
         builder.literal(0)
       ),
       builder.variableDeclarator(
-        builder.identifier('arr_' + idx),
+        builder.identifier(createPrivId('arr' + idx)),
         block.right
       ),
       builder.variableDeclarator(
-        builder.identifier('len_' + idx),
+        builder.identifier(createPrivId('len' + idx)),
         builder.memberExpression(
-          builder.identifier('arr_' + idx),
+          builder.identifier(createPrivId('arr' + idx)),
           builder.identifier('length'),
           false
         )
@@ -83,13 +80,13 @@ function replaceComprehensionBlock(block, idx, insertNode) {
     // test
     builder.binaryExpression(
       '<',
-      builder.identifier('i_' + idx),
-      builder.identifier('len_' + idx)
+      builder.identifier(createPrivId('i' + idx)),
+      builder.identifier(createPrivId('len' + idx))
     ),
     // update
     builder.updateExpression(
       '++',
-      builder.identifier('i_' + idx),
+      builder.identifier(createPrivId('i' + idx)),
       false
     ),
     // body
@@ -196,6 +193,8 @@ parser.parse = function parse(fileData) {
   return ast;
 };
 
+var guessTabWidth = require('./utils').guessTabWidth;
+
 /**
  * Parses source code and replaces array comprehensions
  * with a IIFE that returns an array.
@@ -205,8 +204,14 @@ parser.parse = function parse(fileData) {
  */
 parser.transform = function transform(fileData, options) {
   options || (options = {});
+  options.tabWidth = guessTabWidth(fileData);
 
-  var ast = parser.parse(fileData);
+  var code = recast.print(
+    parser.parse(fileData),
+    util._extend(recastOptions, options)
+  );
 
-  return recast.print(ast, util._extend(recastOptions, options));
+  // Sometimes it's possible to double semicolons.
+  // Fix it.
+  return code.replace(/;;/g, ';');
 };

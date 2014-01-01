@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+"use strict";
+
 var path    = require('path');
 var parser  = require('..');
 var fs      = require('fs');
@@ -9,7 +11,7 @@ function showUsage() {
   var name = path.basename(process.argv[1]);
 
   console.log('Usage:', name, '[options] [--] [FILE]');
-  conosle.log();
+  console.log();
   console.log('Options:');
   console.log('  -h, --help    prints usage info');
   console.log();
@@ -32,6 +34,21 @@ function getStream() {
 
   function end() {
     this.queue(parser.transform(data));
+    this.queue(null);
+  }
+
+  return through(write, end);
+}
+
+function postProcess(fn) {
+  var data = '';
+
+  function write(buf) {
+    data += buf;
+  }
+
+  function end() {
+    this.queue(fn(data));
     this.queue(null);
   }
 
@@ -79,7 +96,6 @@ function run() {
     stream = process.stdin;
   }
 
-  // Love streams and through lib.
   stream.pipe(getStream()).pipe(process.stdout);
 }
 
