@@ -16,7 +16,7 @@ var squared = (function() {
     x = $$arr0[$$i0];
 
     if (x > 2) {
-      result.push(x * y);
+      result.push(x * x);
     }
   }
 
