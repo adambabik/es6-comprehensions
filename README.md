@@ -40,10 +40,10 @@ Array comprehensions progressed to the Draft ECMAScript 6 Specification. It does
 
 ES6 defines also [iterators](http://tc39wiki.calculist.org/es6/iterators/) that can be used together with [for-of loops](http://tc39wiki.calculist.org/es6/for-of/) that can be used in array comprehensions. This translator does **not** support iterators in `for-of` loops. It translates `for-of` loops to plain `for` loops. Thus, it supports only plain JS arrays.
 
-## TODO
+## Todo
 
 * Consider replacing plain `for` loop with `forEach` method. It will result in more compact code,
-~~* Consider migration to escodegen.~~ Removed in order to follow up [esnext's](https://github.com/square/esnext) dependencies.
+* ~~Consider migration to escodegen.~~ Removed in order to follow up [esnext's](https://github.com/square/esnext) dependencies.
 
 ## Development
 
