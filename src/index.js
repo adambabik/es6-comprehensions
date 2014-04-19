@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 var esprima = require('esprima') // harmony version, check out package.json
   , recast  = require('recast')
@@ -6,6 +6,7 @@ var esprima = require('esprima') // harmony version, check out package.json
   , b       = types.builders
   , nt      = types.namedTypes
   , util    = require('util');
+
 
 /**
  * Create pseudo private variable.
@@ -86,13 +87,9 @@ function replaceComprehensionBlock(block, idx, forBody) {
     );
 
   return b.forStatement(
-    // initialization
     varDeclaration,
-    // test
     testExpression,
-    // update
     updateExpression,
-    // body
     blockBody
   );
 }
@@ -128,14 +125,15 @@ function visitNode(node) {
   var resultId = b.identifier('result');
   var pushExpr = createPushExpression(node, resultId);
 
-  var body = node.filter
-    ? b.ifStatement(
-        // test
-        node.filter,
-        // consequent
-        b.blockStatement([pushExpr])
-      )
-    : pushExpr;
+  var body =
+    node.filter
+      ? b.ifStatement(
+          // test
+          node.filter,
+          // consequent
+          b.blockStatement([pushExpr])
+        )
+      : pushExpr;
 
   // Explanation based on:
   // http://people.mozilla.org/~jorendorff/es6-draft.html#sec-array-comprehension
