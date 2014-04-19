@@ -1,20 +1,22 @@
 {
   "name": "es6-comprehensions",
-  "version": "0.1.3",
-  "description": "Array comprehensions compiled to ES5.",
+  "version": "0.2.0",
+  "description": "Transforms ES6 Array Comprehensions to ES5 compliant equivalent.",
   "main": "index.js",
   "bin": "bin/es6-comprehensions",
   "scripts": {
-    "test": "mocha --recursive --reporter spec --timeout 500 test"
+    "test": "mocha --recursive --reporter spec test"
   },
   "dependencies": {
     "esprima": "git://github.com/ariya/esprima.git#harmony",
-    "recast": "~0.4.24",
-    "through": "~2.3.4"
+    "through": "~2.3.4",
+    "recast": "~0.5.16",
+    "yargs": "~1.2.1",
+    "through2": "~0.4.1"
   },
   "devDependencies": {
-    "mocha": "~1.14.0",
-    "expect.js": "~0.2.0"
+    "mocha": "~1.18.0",
+    "expect.js": "~0.3.1"
   },
   "keywords": [
     "array",

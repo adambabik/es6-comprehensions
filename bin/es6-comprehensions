@@ -1,29 +1,15 @@
 #!/usr/bin/env node
 
-"use strict";
+'use strict';
 
-var path    = require('path');
-var parser  = require('..');
-var fs      = require('fs');
-var through = require('through');
+var path    = require('path')
+  , fs      = require('fs')
+  , through = require('through')
+  , parser  = require('..');
 
-function showUsage() {
-  var name = path.basename(process.argv[1]);
-
-  console.log('Usage:', name, '[options] [--] [FILE]');
-  console.log();
-  console.log('Options:');
-  console.log('  -h, --help    prints usage info');
-  console.log();
-  console.log('Examples:');
-  console.log();
-  console.log('  # process a file and output to stdout');
-  console.log('  comprehensify file.js');
-}
-
-function exit(code) {
-  process.exit(code | 0);
-}
+var argv = require('yargs')
+  .usage('Usage: $0 file')
+  .argv;
 
 function getStream() {
   var data = '';
@@ -33,22 +19,7 @@ function getStream() {
   }
 
   function end() {
-    this.queue(parser.transform(data));
-    this.queue(null);
-  }
-
-  return through(write, end);
-}
-
-function postProcess(fn) {
-  var data = '';
-
-  function write(buf) {
-    data += buf;
-  }
-
-  function end() {
-    this.queue(fn(data));
+    this.queue(parser.compile(data));
     this.queue(null);
   }
 
@@ -56,44 +27,20 @@ function postProcess(fn) {
 }
 
 function run() {
-  var args = [];
-
-  Array.prototype.slice.call(arguments).forEach(function (arg) {
-    switch (arg) {
-      case '-h':
-      case '--help':
-        showUsage();
-        exit(0);
-        break;
-
-      case '-o':
-      case '--output':
-        console.log('Unimplemented yet');
-        exit(2);
-        break;
-
-      default:
-        args.push(arg);
-    }
-  });
-
-  if (args.length > 2) {
-    showUsage();
-    exit(1);
-  }
-
-  var stream = null;
+  var stream = null
+    , files = argv._;
 
   // Running in TTY.
   // If no arguments, it means that the input may be passed through stdin.
   // Otherwise, create a stream from file.
   if (process.stdin.isTTY) {
-    stream = (args.length === 0)
+    stream = (files.length === 0)
       ? process.stdin
-      : fs.createReadStream(args[0]);
+      : fs.createReadStream(files[0]);
   } else {
     // If not a TTY, the input should be provided through stdin.
     stream = process.stdin;
+    stream.resume();
   }
 
   stream.pipe(getStream()).pipe(process.stdout);

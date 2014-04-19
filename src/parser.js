@@ -1,217 +1,239 @@
 "use strict";
 
-var esprima = require('esprima'), // harmony version, check out package.json
-    recast  = require('recast'),
-    builder = recast.builder,
-    types   = recast.types,
-    util    = require('util');
+var esprima = require('esprima') // harmony version, check out package.json
+  , recast  = require('recast')
+  , types   = recast.types
+  , b       = types.builders
+  , nt      = types.namedTypes
+  , util    = require('util');
 
-var parser = module.exports;
+/**
+ * Create pseudo private variable.
+ *
+ * @param  {[type]} name [description]
+ * @return {[type]}      [description]
+ */
 
-var recastOptions = {
-  esprima : esprima
-};
-
-/* @type function */
-function createPrivId(name) {
-  return '$$' + name;
+function createPrivateId(name) {
+  return '$_' + name;
 }
 
 /**
- * Returns AST.
- * @param  {string} source
- * @return {object}
+ * Replaces a comprehension block `for...of` loop
+ * with a regular `for` loop.
+ *
+ * @param  {Object} block      Comprehension block
+ * @param  {Number} idx        Block index
+ * @param  {Object} forBody    Body of `for` loop
+ * @return {Object}            ForStatement
  */
-function buildAST(source) {
-  return recast.parse(source, recastOptions);
-}
 
-/**
- * Replaces a comprehension block (for...of loop)
- * with a regular for loop.
- * @param  {object} block      Comprehension block
- * @param  {number} idx        Block index
- * @param  {object} insertNode Body of for loop
- * @return {object}
- */
-function replaceComprehensionBlock(block, idx, insertNode) {
-  var body = builder.blockStatement([
-    builder.expressionStatement(
-      builder.assignmentExpression(
+function replaceComprehensionBlock(block, idx, forBody) {
+  var blockBody = b.blockStatement([
+    b.expressionStatement(
+      b.assignmentExpression(
         '=',
-        builder.identifier(block.left.name),
-        builder.memberExpression(
-          builder.identifier(createPrivId('arr' + idx)),
-          builder.identifier(createPrivId('i' + idx)),
+        b.identifier(block.left.name),
+        b.memberExpression(
+          b.identifier(createPrivateId('arr' + idx)),
+          b.identifier(createPrivateId('i' + idx)),
           true
         )
       )
     )
   ]);
 
-  if (insertNode) {
-    body.body.push(insertNode);
+  if (forBody) {
+    blockBody.body.push(forBody);
   }
 
-  return builder.forStatement(
-    // init
-    builder.variableDeclaration('var', [
-      builder.variableDeclarator(
-        builder.identifier(createPrivId('i' + idx)),
-        builder.literal(0)
+  var varDeclaration =
+    b.variableDeclaration('var', [
+      b.variableDeclarator(
+        b.identifier(createPrivateId('i' + idx)),
+        b.literal(0)
       ),
-      builder.variableDeclarator(
-        builder.identifier(createPrivId('arr' + idx)),
+      b.variableDeclarator(
+        b.identifier(createPrivateId('arr' + idx)),
         block.right
       ),
-      builder.variableDeclarator(
-        builder.identifier(createPrivId('len' + idx)),
-        builder.memberExpression(
-          builder.identifier(createPrivId('arr' + idx)),
-          builder.identifier('length'),
+      b.variableDeclarator(
+        b.identifier(createPrivateId('len' + idx)),
+        b.memberExpression(
+          b.identifier(createPrivateId('arr' + idx)),
+          b.identifier('length'),
           false
         )
       ),
-      builder.variableDeclarator(
-        builder.identifier(block.left.name),
+      b.variableDeclarator(
+        b.identifier(block.left.name),
         null
       ),
-    ]),
-    // test
-    builder.binaryExpression(
+    ]);
+
+  var testExpression =
+    b.binaryExpression(
       '<',
-      builder.identifier(createPrivId('i' + idx)),
-      builder.identifier(createPrivId('len' + idx))
-    ),
-    // update
-    builder.updateExpression(
+      b.identifier(createPrivateId('i' + idx)),
+      b.identifier(createPrivateId('len' + idx))
+    );
+
+  var updateExpression =
+    b.updateExpression(
       '++',
-      builder.identifier(createPrivId('i' + idx)),
+      b.identifier(createPrivateId('i' + idx)),
       false
-    ),
+    );
+
+  return b.forStatement(
+    // initialization
+    varDeclaration,
+    // test
+    testExpression,
+    // update
+    updateExpression,
     // body
-    body
+    blockBody
   );
 }
 
 /**
- * Parses source code and returns transformed AST.
- * @param  {string} fileData Input source code
- * @return {object}          AST
+ * Create `arr.push(arg)` expression.
+ *
+ * @param  {Object} node       Argument of `push` method
+ * @param  {Object} identifier Identifier on which call `push`
+ * @return {Object}            Expression Statement
  */
-parser.parse = function parse(fileData) {
-  var ast = buildAST(fileData);
-  var tmpArray = builder.identifier('result');
 
-  types.traverse(ast, function (child) {
-    if (!types.namedTypes.ComprehensionExpression.check(child)) {
-      return;
-    }
-
-    var push =
-      builder.expressionStatement(
-        builder.callExpression(
-          // callee
-          builder.memberExpression(
-            tmpArray,
-            builder.identifier('push'),
-            false
-          ),
-          // arguments
-          [child.body]
-        )
-      );
-
-    var body = child.filter
-      ? builder.ifStatement(
-          // test
-          child.filter,
-          // consequent
-          builder.blockStatement([push])
-        )
-      : push;
-
-    // Explanation based on:
-    // http://people.mozilla.org/~jorendorff/es6-draft.html#sec-array-comprehension
-    //
-    // Array comprehension consists of body, blocks and filter.
-    // Body is an actual transformation performed on items.
-    // Blocks are for...of loops which takes items from arrays/iterator.
-    // Filter is the last part of the whole expression and selectes
-    // only items that match the conditions.
-    //
-    // All blocks (for...of loops) are transformed into nested for loops.
-    // The filter is checked in the innermost function.
-    var lastFor = null;
-    var blocks = child.blocks.slice().reverse();
-    blocks.forEach(function (block, idx) {
-      lastFor = replaceComprehensionBlock(
-        block,
-        blocks.length - 1 - idx,
-        lastFor || body
-      );
-    });
-
-    // The whole array comprehension is replaced with IIFE
-    // that returns array.
-    var replacement = builder.expressionStatement(
-      builder.callExpression(
-        // function expression
-        builder.functionExpression(
-          // id
-          null,
-          // params
-          [],
-          // body
-          builder.blockStatement([
-            builder.variableDeclaration(
-              'var', [
-                builder.variableDeclarator(
-                  tmpArray,
-                  builder.arrayExpression([])
-                ),
-              ]
-            ),
-            lastFor,
-            builder.returnStatement(
-              tmpArray
-            )
-          ]),
-          // is a generator
-          false,
-          // is an expression
-          false
-        ),
-        // arguments
-        []
-      )
-    );
-
-    this.replace(replacement);
-  }); // end traverse
-
-  return ast;
-};
-
-var guessTabWidth = require('./utils').guessTabWidth;
-
-/**
- * Parses source code and replaces array comprehensions
- * with a IIFE that returns an array.
- * @param  {string} fileData   Input source code
- * @param  {object} [options]  Output formatting options
- * @return {string}
- */
-parser.transform = function transform(fileData, options) {
-  options || (options = {});
-  options.tabWidth = guessTabWidth(fileData);
-
-  var code = recast.print(
-    parser.parse(fileData),
-    util._extend(recastOptions, options)
+function createPushExpression(node, identifier) {
+  var resultMemberExpression = b.memberExpression(
+    identifier,
+    b.identifier('push'),
+    false
   );
 
-  // Sometimes it's possible to double semicolons.
-  // Fix it.
-  return code.replace(/;;/g, ';');
-};
+  return b.expressionStatement(
+    b.callExpression(
+      resultMemberExpression,
+      [node.body]
+    )
+  );
+}
+
+function visitNode(node) {
+  if (!nt.ComprehensionExpression.check(node)) {
+    return;
+  }
+
+  var resultId = b.identifier('result');
+  var pushExpr = createPushExpression(node, resultId);
+
+  var body = node.filter
+    ? b.ifStatement(
+        // test
+        node.filter,
+        // consequent
+        b.blockStatement([pushExpr])
+      )
+    : pushExpr;
+
+  // Explanation based on:
+  // http://people.mozilla.org/~jorendorff/es6-draft.html#sec-array-comprehension
+  //
+  // Array comprehension consists of body, blocks and filter.
+  // Body is an actual transformation performed on items.
+  // Blocks are for...of loops which takes items from arrays/iterator.
+  // Filter is the last part of the whole expression and selectes
+  // only items that match the conditions.
+  //
+  // All blocks (for...of loops) are transformed into nested for loops.
+  // The filter is checked in the innermost function.
+  var lastFor = null;
+  var blocks = node.blocks.slice().reverse();
+  blocks.forEach(function (block, idx) {
+    lastFor = replaceComprehensionBlock(
+      block,
+      blocks.length - 1 - idx,
+      lastFor || body
+    );
+  });
+
+  // The whole array comprehension is replaced with IIFE
+  // that returns array.
+  var replacement = b.expressionStatement(
+    b.callExpression(
+      // function expression
+      b.functionExpression(
+        // id
+        null,
+        // params
+        [],
+        // body
+        b.blockStatement([
+          b.variableDeclaration(
+            'var', [
+              b.variableDeclarator(
+                resultId,
+                b.arrayExpression([])
+              ),
+            ]
+          ),
+          lastFor,
+          b.returnStatement(
+            resultId
+          )
+        ]),
+        // is a generator
+        false,
+        // is an expression
+        false
+      ),
+      // arguments
+      []
+    )
+  );
+
+  this.replace(replacement);
+}
+
+/**
+ * Transform an ES6 Esprima AST to the ES5 equivalent
+ * by replacing ComprehensionExpression.
+ *
+ * @param  {Object} ast Esprima AST to transform
+ * @return {Object}     Transformed AST
+ */
+
+function transform(ast) {
+  return types.traverse(ast, visitNode);
+}
+
+/**
+ * Transform JavaScript ES6 code to ES5 compliant one
+ * by replacing Array Comprehensions with `for` loops.
+ *
+ * @param  {String} source        Source code
+ * @param  {Object} [mapOpts={}]  Source map options
+ * @return {String}
+ */
+
+function compile(source, mapOpts) {
+  mapOpts || (mapOpts = {});
+
+  var recastOptions = {
+    esprima: esprima, // using harmony branch
+    sourceFileName: mapOpts.sourceFileName,
+    sourceMapName: mapOpts.sourceMapName,
+    tabWidth: require('./utils').guessTabWidth(source)
+  };
+
+  var ast = recast.parse(source, recastOptions);
+  return recast.print(transform(ast), recastOptions).code.replace(/;;/g, ';');
+}
+
+/**
+ * Export public API.
+ */
+
+module.exports.compile = compile;
+module.exports.transform = transform;

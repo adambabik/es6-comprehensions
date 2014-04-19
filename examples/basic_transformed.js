@@ -3,8 +3,8 @@
 var squared = (function() {
   var result = [];
 
-  for (var $$i0 = 0, $$arr0 = [1,2,3,4,5], $$len0 = $$arr0.length, x; $$i0 < $$len0; $$i0++) {
-    x = $$arr0[$$i0];
+  for (var $_i0 = 0, $_arr0 = [1,2,3,4,5], $_len0 = $_arr0.length, x; $_i0 < $_len0; $_i0++) {
+    x = $_arr0[$_i0];
 
     if (x > 2) {
       result.push(x * x);
