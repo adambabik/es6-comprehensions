@@ -2,7 +2,7 @@
   "name": "es6-comprehensions",
   "version": "0.2.0",
   "description": "Transforms ES6 Array Comprehensions to ES5 compliant equivalent.",
-  "main": "index.js",
+  "main": "src/index.js",
   "bin": "bin/es6-comprehensions",
   "scripts": {
     "test": "mocha --recursive --reporter spec test"
