@@ -158,37 +158,35 @@ function visitNode(node) {
 
   // The whole array comprehension is replaced with IIFE
   // that returns array.
-  var replacement = b.expressionStatement(
-    b.callExpression(
-      // function expression
-      b.functionExpression(
-        // id
-        null,
-        // params
-        [],
-        // body
-        b.blockStatement([
-          b.variableDeclaration(
-            'var', [
-              b.variableDeclarator(
-                resultId,
-                b.arrayExpression([])
-              ),
-            ]
-          ),
-          lastFor,
-          b.returnStatement(
-            resultId
-          )
-        ]),
-        // is a generator
-        false,
-        // is an expression
-        false
-      ),
-      // arguments
-      []
-    )
+  var replacement = b.callExpression(
+    // function expression
+    b.functionExpression(
+      // id
+      null,
+      // params
+      [],
+      // body
+      b.blockStatement([
+        b.variableDeclaration(
+          'var', [
+            b.variableDeclarator(
+              resultId,
+              b.arrayExpression([])
+            ),
+          ]
+        ),
+        lastFor,
+        b.returnStatement(
+          resultId
+        )
+      ]),
+      // is a generator
+      false,
+      // is an expression
+      false
+    ),
+    // arguments
+    []
   );
 
   this.replace(replacement);
@@ -226,7 +224,7 @@ function compile(source, mapOpts) {
   };
 
   var ast = recast.parse(source, recastOptions);
-  return recast.print(transform(ast), recastOptions).code.replace(/;;/g, ';');
+  return recast.print(transform(ast), recastOptions).code;
 }
 
 /**

@@ -1,6 +1,6 @@
 "use strict";
 
-var squared = (function() {
+var squared = function() {
   var result = [];
 
   for (var $_i0 = 0, $_arr0 = [1,2,3,4,5], $_len0 = $_arr0.length, x; $_i0 < $_len0; $_i0++) {
@@ -12,7 +12,7 @@ var squared = (function() {
   }
 
   return result;
-})();
+}();
 
 function mul(a, b) {
   return a * b;
