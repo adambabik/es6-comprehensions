@@ -1,6 +1,6 @@
 {
   "name": "es6-comprehensions",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Transforms ES6 Array Comprehensions to ES5 compliant equivalent.",
   "main": "src/index.js",
   "bin": "bin/es6-comprehensions",
