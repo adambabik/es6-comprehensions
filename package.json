@@ -5,14 +5,15 @@
   "main": "src/index.js",
   "bin": "bin/es6-comprehensions",
   "scripts": {
-    "test": "mocha --recursive --reporter spec test"
+    "test": "mocha --recursive --reporter spec --bail ./test"
   },
   "dependencies": {
     "esprima": "git://github.com/ariya/esprima.git#harmony",
     "through": "~2.3.4",
     "recast": "~0.5.16",
     "yargs": "~1.2.1",
-    "through2": "~0.4.1"
+    "through2": "~0.4.1",
+    "ast-util": "0.0.6"
   },
   "devDependencies": {
     "mocha": "~1.18.0",

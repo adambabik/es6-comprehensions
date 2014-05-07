@@ -2,42 +2,42 @@
 
 var esprima = require('esprima') // harmony version, check out package.json
   , recast  = require('recast')
+  , astUtil = require('ast-util')
   , types   = recast.types
   , b       = types.builders
   , nt      = types.namedTypes
+  , NodePath = types.NodePath
   , util    = require('util');
-
-
-/**
- * Create pseudo private variable.
- *
- * @param  {[type]} name [description]
- * @return {[type]}      [description]
- */
-
-function createPrivateId(name) {
-  return '$_' + name;
-}
 
 /**
  * Replaces a comprehension block `for...of` loop
  * with a regular `for` loop.
  *
+ * @param  {Object} scope      IIFE scope
  * @param  {Object} block      Comprehension block
  * @param  {Number} idx        Block index
  * @param  {Object} forBody    Body of `for` loop
  * @return {Object}            ForStatement
  */
 
-function replaceComprehensionBlock(block, idx, forBody) {
+function replaceComprehensionBlock(scope, block, idx, forBody) {
+  var arrIdentifier = astUtil.uniqueIdentifier(scope, 'arr');
+  astUtil.injectVariable(scope, arrIdentifier);
+
+  var iIdentifier = astUtil.uniqueIdentifier(scope, 'i');
+  astUtil.injectVariable(scope, iIdentifier);
+
+  var lenIdentifier = astUtil.uniqueIdentifier(scope, 'len');
+  astUtil.injectVariable(scope, lenIdentifier);
+
   var blockBody = b.blockStatement([
     b.expressionStatement(
       b.assignmentExpression(
         '=',
         b.identifier(block.left.name),
         b.memberExpression(
-          b.identifier(createPrivateId('arr' + idx)),
-          b.identifier(createPrivateId('i' + idx)),
+          arrIdentifier,
+          iIdentifier,
           true
         )
       )
@@ -51,17 +51,17 @@ function replaceComprehensionBlock(block, idx, forBody) {
   var varDeclaration =
     b.variableDeclaration('var', [
       b.variableDeclarator(
-        b.identifier(createPrivateId('i' + idx)),
+        iIdentifier,
         b.literal(0)
       ),
       b.variableDeclarator(
-        b.identifier(createPrivateId('arr' + idx)),
+        arrIdentifier,
         block.right
       ),
       b.variableDeclarator(
-        b.identifier(createPrivateId('len' + idx)),
+        lenIdentifier,
         b.memberExpression(
-          b.identifier(createPrivateId('arr' + idx)),
+          arrIdentifier,
           b.identifier('length'),
           false
         )
@@ -75,14 +75,14 @@ function replaceComprehensionBlock(block, idx, forBody) {
   var testExpression =
     b.binaryExpression(
       '<',
-      b.identifier(createPrivateId('i' + idx)),
-      b.identifier(createPrivateId('len' + idx))
+      iIdentifier,
+      lenIdentifier
     );
 
   var updateExpression =
     b.updateExpression(
       '++',
-      b.identifier(createPrivateId('i' + idx)),
+      iIdentifier,
       false
     );
 
@@ -97,22 +97,20 @@ function replaceComprehensionBlock(block, idx, forBody) {
 /**
  * Create `arr.push(arg)` expression.
  *
- * @param  {Object} node       Argument of `push` method
+ * @param  {Object} body       Argument of `push` method
  * @param  {Object} identifier Identifier on which call `push`
  * @return {Object}            Expression Statement
  */
 
-function createPushExpression(node, identifier) {
-  var resultMemberExpression = b.memberExpression(
-    identifier,
-    b.identifier('push'),
-    false
-  );
-
+function createPushExpression(body, identifier) {
   return b.expressionStatement(
     b.callExpression(
-      resultMemberExpression,
-      [node.body]
+      b.memberExpression(
+        identifier,
+        b.identifier('push'),
+        false
+      ),
+      [body]
     )
   );
 }
@@ -122,18 +120,27 @@ function visitNode(node) {
     return;
   }
 
-  var resultId = b.identifier('result');
-  var pushExpr = createPushExpression(node, resultId);
+  var self = this;
+
+  var iife = b.functionExpression(
+    null,  // id
+    [],    // params
+    b.blockStatement([]),  // body
+    false, // is a generator
+    false  // is an expression
+  );
+  var iifeScope = new NodePath(iife, this).scope;
+
+  var resultIdentifier = astUtil.uniqueIdentifier(self.scope, 'result');
+  var pushResultExpr = createPushExpression(node.body, resultIdentifier);
 
   var body =
     node.filter
       ? b.ifStatement(
-          // test
-          node.filter,
-          // consequent
-          b.blockStatement([pushExpr])
+          node.filter,  // test
+          b.blockStatement([pushResultExpr])  // consequent
         )
-      : pushExpr;
+      : pushResultExpr;
 
   // Explanation based on:
   // http://people.mozilla.org/~jorendorff/es6-draft.html#sec-array-comprehension
@@ -150,46 +157,35 @@ function visitNode(node) {
   var blocks = node.blocks.slice().reverse();
   blocks.forEach(function (block, idx) {
     lastFor = replaceComprehensionBlock(
+      iifeScope,
       block,
       blocks.length - 1 - idx,
       lastFor || body
     );
   });
 
+  // Update function body.
+  iife.body = b.blockStatement([
+    b.variableDeclaration(
+      'var', [
+        b.variableDeclarator(
+          resultIdentifier,
+          b.arrayExpression([])
+        ),
+      ]
+    ),
+    lastFor,
+    b.returnStatement(
+      resultIdentifier
+    )
+  ]);
+
   // The whole array comprehension is replaced with IIFE
   // that returns array.
-  var replacement = b.callExpression(
-    // function expression
-    b.functionExpression(
-      // id
-      null,
-      // params
-      [],
-      // body
-      b.blockStatement([
-        b.variableDeclaration(
-          'var', [
-            b.variableDeclarator(
-              resultId,
-              b.arrayExpression([])
-            ),
-          ]
-        ),
-        lastFor,
-        b.returnStatement(
-          resultId
-        )
-      ]),
-      // is a generator
-      false,
-      // is an expression
-      false
-    ),
-    // arguments
-    []
-  );
-
-  this.replace(replacement);
+  this.replace(b.callExpression(
+    iife,  // function expression
+    []     // arguments
+  ));
 }
 
 /**

@@ -1,17 +1,17 @@
 "use strict";
 
 var squared = function() {
-  var result = [];
+  var $__result = [];
 
-  for (var $_i0 = 0, $_arr0 = [1,2,3,4,5], $_len0 = $_arr0.length, x; $_i0 < $_len0; $_i0++) {
-    x = $_arr0[$_i0];
+  for (var $__i = 0, $__arr = [1,2,3,4,5], $__len = $__arr.length, x; $__i < $__len; $__i++) {
+    x = $__arr[$__i];
 
     if (x > 2) {
-      result.push(x * x);
+      $__result.push(x * x);
     }
   }
 
-  return result;
+  return $__result;
 }();
 
 function mul(a, b) {
