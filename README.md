@@ -24,14 +24,16 @@ var squared = (function() {
 })();
 ```
 
+I'm glad to inform you that **es6-comprehensions** is now a part of [es-next](https://github.com/square/esnext) project.
+
 For more information check out [the current draft for ECMAScript 6](http://people.mozilla.org/~jorendorff/es6-draft.html#sec-array-comprehension).
 
-Please notice that the syntax has changed and many resources is still using old one.
+Please notice that the syntax has changed and many resources is still using the old one.
 
 ## Installation
 
 ```
-$ npm install es6-comprehensions
+$ npm install es6-comprehensions [--save]
 ```
 
 ## Support
