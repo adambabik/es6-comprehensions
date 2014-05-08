@@ -57,9 +57,17 @@ Pull requests are highly appreciated.
 
 ## Changelog
 
+### v0.2.2
+
+* Using [ast-util](https://github.com/square/ast-util) to generate safe temporary variables.
+
+### v0.2.1
+
+* Replaced ComprehensionExpression with CallExpression instead of ExpressionStatement.
+
 ### v0.2.0
 
-* Changed API to be compliant with [esnext's](https://github.com/square/esnext) requirements.
+* Changed API to conform to [esnext's](https://github.com/square/esnext) requirements.
 
 ## License
 
