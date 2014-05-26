@@ -183,7 +183,14 @@ function visitNode(node) {
   // The whole array comprehension is replaced with IIFE
   // that returns array.
   this.replace(b.callExpression(
-    iife,  // function expression
+    b.callExpression(
+      b.memberExpression(
+        iife,  // function expression
+        b.identifier('bind'),
+        false
+      ),
+      [b.thisExpression()]
+    ),
     []     // arguments
   ));
 }

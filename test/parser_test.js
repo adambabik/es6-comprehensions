@@ -38,5 +38,15 @@ describe('parser', function () {
       var code = '[ for (x of [1,2]) for (y of [1,2]) x * y ];';
       expect(eval(compile(code))).to.eql([1,2,2,4]);
     });
+
+    it('array comprehension with this expression', function () {
+      this.arr1 = [1, 2];
+      this.arr2 = [1, 2];
+      this.add = function(a, b) {
+        return a + b;
+      };
+      var code = '[ for (x of this.arr1) for (y of this.arr2) this.add(x, y) ];';
+      expect(eval(compile(code))).to.eql([2,3,3,4]);
+    });
   });
 });
