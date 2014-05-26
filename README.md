@@ -57,6 +57,10 @@ Pull requests are highly appreciated.
 
 ## Changelog
 
+### v0.2.3
+
+* Binding current scope to the generated function expression. This allows one to use `this` in an array comprehension. An example can be found in [a test file](https://github.com/dreame4/es6-comprehensions/blob/master/test/parser_test.js#L48). (Thanks [@vslinko](https://github.com/vslinko) for PR.)
+
 ### v0.2.2
 
 * Using [ast-util](https://github.com/square/ast-util) to generate safe temporary variables.
