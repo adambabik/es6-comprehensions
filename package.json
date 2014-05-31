@@ -13,7 +13,8 @@
     "recast": "~0.5.16",
     "yargs": "~1.2.1",
     "through2": "~0.4.1",
-    "ast-util": "0.0.6"
+    "ast-util": "0.0.6",
+    "es6-for-of": "0.2.3"
   },
   "devDependencies": {
     "mocha": "~1.18.0",
