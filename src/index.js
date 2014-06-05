@@ -7,6 +7,7 @@ var esprima = require('esprima') // harmony version, check out package.json
   , b       = types.builders
   , nt      = types.namedTypes
   , NodePath = types.NodePath
+  , es6ForOf = require('es6-for-of')
   , util    = require('util');
 
 /**
@@ -21,76 +22,20 @@ var esprima = require('esprima') // harmony version, check out package.json
  */
 
 function replaceComprehensionBlock(scope, block, idx, forBody) {
-  var arrIdentifier = astUtil.uniqueIdentifier(scope, 'arr');
-  astUtil.injectVariable(scope, arrIdentifier);
-
-  var iIdentifier = astUtil.uniqueIdentifier(scope, 'i');
-  astUtil.injectVariable(scope, iIdentifier);
-
-  var lenIdentifier = astUtil.uniqueIdentifier(scope, 'len');
-  astUtil.injectVariable(scope, lenIdentifier);
-
-  var blockBody = b.blockStatement([
-    b.expressionStatement(
-      b.assignmentExpression(
-        '=',
-        b.identifier(block.left.name),
-        b.memberExpression(
-          arrIdentifier,
-          iIdentifier,
-          true
-        )
-      )
-    )
-  ]);
-
-  if (forBody) {
-    blockBody.body.push(forBody);
+  if (!nt.BlockStatement.check(forBody)) {
+    forBody = b.blockStatement([forBody]);
   }
 
-  var varDeclaration =
-    b.variableDeclaration('var', [
-      b.variableDeclarator(
-        iIdentifier,
-        b.literal(0)
-      ),
-      b.variableDeclarator(
-        arrIdentifier,
-        block.right
-      ),
-      b.variableDeclarator(
-        lenIdentifier,
-        b.memberExpression(
-          arrIdentifier,
-          b.identifier('length'),
-          false
-        )
-      ),
-      b.variableDeclarator(
+  return b.forOfStatement(
+    b.variableDeclaration(
+      'var',
+      [b.variableDeclarator(
         b.identifier(block.left.name),
         null
-      ),
-    ]);
-
-  var testExpression =
-    b.binaryExpression(
-      '<',
-      iIdentifier,
-      lenIdentifier
-    );
-
-  var updateExpression =
-    b.updateExpression(
-      '++',
-      iIdentifier,
-      false
-    );
-
-  return b.forStatement(
-    varDeclaration,
-    testExpression,
-    updateExpression,
-    blockBody
+      )]
+    ),
+    block.right,
+    forBody
   );
 }
 
@@ -179,6 +124,8 @@ function visitNode(node) {
       resultIdentifier
     )
   ]);
+
+  es6ForOf.transform(new NodePath(iife, this));
 
   // The whole array comprehension is replaced with IIFE
   // that returns array.

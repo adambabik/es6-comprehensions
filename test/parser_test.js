@@ -48,5 +48,24 @@ describe('parser', function () {
       var code = '[ for (x of this.arr1) for (y of this.arr2) this.add(x, y) ];';
       expect(eval(compile(code))).to.eql([2,3,3,4]);
     });
+
+    it('array comprehension with iterator', function () {
+      var index = 1;
+      var iter = {
+        '@@iterator': function () {
+          return {
+            next: function () {
+              if (index > 3) {
+                return {value: void 0, done: true};
+              } else {
+                return {value: index++, done: false};
+              }
+            }
+          };
+        }
+      };
+      var code = '[ for (x of iter) x ]';
+      expect(eval(compile(code))).to.eql([1, 2, 3]);
+    });
   });
 });
