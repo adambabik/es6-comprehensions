@@ -9,19 +9,22 @@ var squared = [ for (x of [1,2,3,4,5]) if (x > 2) x * x ];
 compiles to:
 
 ```js
-var squared = (function() {
-  var result = [];
+var $__getIterator = function(iterable) { ... };
+var $__arrayIterator = function(array) { ... };
 
-  for (var $_i0 = 0, $_arr0 = [1,2,3,4,5], $_len0 = $_arr0.length, x; $_i0 < $_len0; $_i0++) {
-    x = $_arr0[$_i0];
+var squared = function() {
+  var $__result = [];
+
+  for (var $__0 = $__getIterator([1,2,3,4,5]), $__1; !($__1 = $__0.next()).done; ) {
+    var x = $__1.value;
 
     if (x > 2) {
-      result.push(x * x);
+      $__result.push(x * x);
     }
   }
 
-  return result;
-})();
+  return $__result;
+}.bind(this)();
 ```
 
 I'm glad to inform you that **es6-comprehensions** is now a part of [es-next](https://github.com/square/esnext) project.
@@ -56,6 +59,10 @@ ES6 defines also [iterators](http://tc39wiki.calculist.org/es6/iterators/) that 
 Pull requests are highly appreciated.
 
 ## Changelog
+
+### v0.3.0
+
+* Added support for `for...of` loop. (Thanks [@vslinko](https://github.com/vslinko) for PR.) **Important!** Generated code contains two more necessary functions.
 
 ### v0.2.3
 
