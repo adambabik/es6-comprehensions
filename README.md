@@ -47,7 +47,7 @@ ES6 defines also [iterators](http://tc39wiki.calculist.org/es6/iterators/) that 
 
 ## Todo
 
-* Consider replacing plain `for` loop with `forEach` method. It will result in more compact code,
+* ~~Consider replacing plain `for` loop with `forEach` method. It will result in more compact code,~~ Invalid as `for..of` support was added in version 0.3.0.
 * ~~Consider migration to escodegen.~~ Removed in order to follow up [esnext's](https://github.com/square/esnext) dependencies.
 
 ## Development
@@ -66,7 +66,7 @@ Pull requests are highly appreciated.
 
 ### v0.3.0
 
-* Added support for `for...of` loop. (Thanks [@vslinko](https://github.com/vslinko) for PR.) **Important!** Generated code contains two more necessary functions.
+* Added support for `for..of` loop. (Thanks [@vslinko](https://github.com/vslinko) for PR.) **Important!** Generated code contains two more necessary functions.
 
 ### v0.2.3
 
