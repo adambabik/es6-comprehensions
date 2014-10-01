@@ -16,7 +16,7 @@
 
   "undef"         : true,
   "laxbreak"      : true,   // Tolerate unsafe line breaks e.g. `return [\n] x` without semicolons.
-  "laxcomma"      : false,
+  "laxcomma"      : true,
   "curly"         : false,  // Require {} for every new block or scope.
   "eqeqeq"        : true,   // Require triple equals i.e. `===`.
   "eqnull"        : true,   // Tolerate use of `== null`.

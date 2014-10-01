@@ -1,14 +1,13 @@
 'use strict';
 
-var esprima = require('esprima') // harmony version, check out package.json
+var esprima = require('esprima-fb')
   , recast  = require('recast')
   , astUtil = require('ast-util')
   , types   = recast.types
   , b       = types.builders
   , nt      = types.namedTypes
   , NodePath = types.NodePath
-  , es6ForOf = require('es6-for-of')
-  , util    = require('util');
+  , es6ForOf = require('es6-for-of');
 
 /**
  * Replaces a comprehension block `for...of` loop
