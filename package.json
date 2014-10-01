@@ -8,7 +8,7 @@
     "test": "mocha --recursive --reporter spec --bail ./test"
   },
   "dependencies": {
-    "esprima": "git://github.com/ariya/esprima.git#harmony",
+    "esprima-fb": "^6001.1001.0-dev-harmony-fb",
     "through": "~2.3.4",
     "recast": "~0.5.16",
     "yargs": "~1.2.1",
