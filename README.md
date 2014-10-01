@@ -60,6 +60,10 @@ Pull requests are highly appreciated.
 
 ## Changelog
 
+### v0.3.1
+
+* Switched to [`esprima-fb`](https://github.com/facebook/esprima).
+
 ### v0.3.0
 
 * Added support for `for...of` loop. (Thanks [@vslinko](https://github.com/vslinko) for PR.) **Important!** Generated code contains two more necessary functions.
